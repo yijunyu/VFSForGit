@@ -11,8 +11,7 @@ namespace GVFS.Common
         public const string DownloadDirectory = "Downloads";
         public const string GVFSInstallerFileNamePrefix = "SetupGVFS";
         public const string VFSForGitInstallerFileNamePrefix = "VFSForGit";
-
-        protected const string RootDirectory = UpgradeDirectoryName;
+        public const string RootDirectory = UpgradeDirectoryName;
 
         public static bool IsLocalUpgradeAvailable(string installerExtension)
         {

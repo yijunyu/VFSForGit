@@ -1,8 +1,5 @@
-using GVFS.Common.FileSystem;
-using GVFS.Common.Git;
 using GVFS.Common.Tracing;
 using System;
-using System.IO;
 
 namespace GVFS.Common
 {
@@ -11,8 +8,20 @@ namespace GVFS.Common
         public static IProductUpgrader CreateUpgrader(ITracer tracer, out string error)
         {
             IProductUpgrader upgrader;
+
             bool isEnabled;
             bool isConfigured;
+            if (NuGetUpgrader.TryCreateNuGetUpgrader(tracer, out isEnabled, out isConfigured, out upgrader, out error))
+            {
+                return upgrader;
+            }
+
+            if (isEnabled && !isConfigured)
+            {
+                // Configuration error
+                return null;
+            }
+
             error = string.Empty;
             
             if ((upgrader = GitHubUpgrader.Create(tracer, out isEnabled, out isConfigured)) != null)
