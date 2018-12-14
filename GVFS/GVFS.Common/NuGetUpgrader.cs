@@ -199,19 +199,38 @@ namespace GVFS.Common
 
         public bool TryRunInstaller(InstallActionWrapper installActionWrapper, out string error)
         {
+            string localError = null;
+            int installerExitCode;
+            bool installErrorEncountered = false;
+
             foreach (ManifestEntry entry in this.Manifest.ManifestEntries)
             {
                 installActionWrapper(
                     () =>
                     {
-                        Thread.Sleep(10 * 1000);
-                        return true;
+                        string installerPath = Path.Combine(this.ExtractedPath, "content", entry.RelativePath);
+                        this.RunInstaller(installerPath, entry.Args, out installerExitCode, out localError);
+
+                        installErrorEncountered = installerExitCode != 0;
+
+                        // Just for initial experiment to make sure each step is displayed in UI
+                        Thread.Sleep(5 * 1000);
+
+                        return installErrorEncountered;
                     },
-                    $"Installing {entry.Name} with Args: {entry.Args}");
+                    $"Installing {entry.Name} Version: {entry.Version} with Args: {entry.Args}");
             }
 
-            error = null;
-            return true;
+            if (installErrorEncountered)
+            {
+                error = localError;
+                return false;
+            }
+            else
+            {
+                error = null;
+                return true;
+            }
         }
 
         public void CleanupDownloadDirectory()
