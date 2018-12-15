@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace GVFS.Common
@@ -7,7 +8,7 @@ namespace GVFS.Common
     {
         public ReleaseManifest()
         {
-            this.Properties = new Dictionary<string, ManifestEntry>();
+            this.Properties = new Dictionary<string, ManifestEntry>(StringComparer.OrdinalIgnoreCase);
             this.ManifestEntries = new List<ManifestEntry>();
         }
 

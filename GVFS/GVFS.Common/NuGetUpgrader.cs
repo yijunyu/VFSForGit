@@ -146,7 +146,8 @@ namespace GVFS.Common
         {
             try
             {
-                Version version = new Version(this.Manifest.Properties["git"].Version);
+                // Version version = new Version(this.Manifest.Properties["Git"].Version);
+                Version version = new Version(2, 0);
                 gitVersion = new GitVersion(version.Major, version.Minor, version.MinorRevision, "Windows", version.Build, version.Revision);
             }
             catch (Exception ex)
@@ -201,7 +202,7 @@ namespace GVFS.Common
         {
             string localError = null;
             int installerExitCode;
-            bool installErrorEncountered = false;
+            bool installSuccesesfull = true;
 
             foreach (ManifestEntry entry in this.Manifest.ManifestEntries)
             {
@@ -211,17 +212,17 @@ namespace GVFS.Common
                         string installerPath = Path.Combine(this.ExtractedPath, "content", entry.RelativePath);
                         this.RunInstaller(installerPath, entry.Args, out installerExitCode, out localError);
 
-                        installErrorEncountered = installerExitCode != 0;
+                        installSuccesesfull = installerExitCode == 0;
 
                         // Just for initial experiment to make sure each step is displayed in UI
                         Thread.Sleep(5 * 1000);
 
-                        return installErrorEncountered;
+                        return installSuccesesfull;
                     },
-                    $"Installing {entry.Name} Version: {entry.Version} with Args: {entry.Args}");
+                    $"Installing {entry.Name} Version: {entry.Version}");
             }
 
-            if (installErrorEncountered)
+            if (!installSuccesesfull)
             {
                 error = localError;
                 return false;

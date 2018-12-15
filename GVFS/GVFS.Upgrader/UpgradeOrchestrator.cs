@@ -176,6 +176,8 @@ namespace GVFS.Upgrader
                 return false;
             }
 
+            this.upgrader.TryGetGitVersion(out newGitVersion, out error);
+
             if (!this.LaunchInsideSpinner(
                 () =>
                 {
