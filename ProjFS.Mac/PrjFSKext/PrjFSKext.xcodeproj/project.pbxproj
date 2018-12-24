@@ -342,9 +342,9 @@
 		4A91E088215FA5FF0079FE1B /* Profiling(Release) */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4VN3E4LH49;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MACH_ASSERT=1",
 					"$(inherited)",
@@ -499,8 +499,9 @@
 		C6C780B9207FC67200E7E054 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = 4VN3E4LH49;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -527,8 +528,9 @@
 		C6C780BA207FC67200E7E054 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = 4VN3E4LH49;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MACH_ASSERT=1",
 					"$(inherited)",
