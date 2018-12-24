@@ -1,7 +1,10 @@
 ﻿using GVFS.Common.Git;
 using GVFS.Common.Tracing;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace GVFS.Common.Maintenance
 {
@@ -10,17 +13,16 @@ namespace GVFS.Common.Maintenance
         public const string ObjectCacheLock = "git-maintenance-step.lock";
         private readonly object gitProcessLock = new object();
 
-        public GitMaintenanceStep(GVFSContext context, GitObjects gitObjects, bool requireObjectCacheLock)
+        public GitMaintenanceStep(GVFSContext context, bool requireObjectCacheLock)
         {
             this.Context = context;
-            this.GitObjects = gitObjects;
             this.RequireObjectCacheLock = requireObjectCacheLock;
         }
 
         public abstract string Area { get; }
-
+        protected virtual TimeSpan TimeBetweenRuns { get; }
+        protected virtual string LastRunTimeFilePath { get; set; }
         protected GVFSContext Context { get; }
-        protected GitObjects GitObjects { get; }
         protected GitProcess GitProcess { get; private set; }
         protected bool Stopping { get; private set; }
         protected bool RequireObjectCacheLock { get; }
@@ -143,6 +145,45 @@ namespace GVFS.Common.Maintenance
             return metadata;
         }
 
+        protected bool EnoughTimeBetweenRuns()
+        {
+            if (!this.Context.FileSystem.FileExists(this.LastRunTimeFilePath))
+            {
+                return true;
+            }
+
+            string lastRunTime = this.Context.FileSystem.ReadAllText(this.LastRunTimeFilePath);
+            if (!long.TryParse(lastRunTime, out long result))
+            {
+                this.Context.Tracer.RelatedError("Failed to parse long: {0}", lastRunTime);
+                return true;
+            }
+
+            if (DateTime.UtcNow.Subtract(EpochConverter.FromUnixEpochSeconds(result)) >= this.TimeBetweenRuns)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected void SaveLastRunTimeToFile()
+        {
+            if (!this.Context.FileSystem.TryWriteTempFileAndRename(
+                this.LastRunTimeFilePath,
+                EpochConverter.ToUnixEpochSeconds(DateTime.UtcNow).ToString(),
+                out Exception handledException))
+            {
+                this.Context.Tracer.RelatedError(this.CreateEventMetadata(handledException), "Failed to record run time");
+            }
+        }
+
+        protected IEnumerable<int> RunningGitProcessIds()
+        {
+            Process[] allProcesses = Process.GetProcesses();
+            return allProcesses.Where(x => x.ProcessName.Equals("git", StringComparison.OrdinalIgnoreCase)).Select(x => x.Id);
+        }
+
         private void CreateProcessAndRun()
         {
             lock (this.gitProcessLock)
@@ -152,7 +193,7 @@ namespace GVFS.Common.Maintenance
                     return;
                 }
 
-                this.GitProcess = new GitProcess(this.Context.Enlistment);
+                this.GitProcess = this.Context.Enlistment.CreateGitProcess();
             }
 
             this.PerformMaintenance();

@@ -3,7 +3,9 @@ using GVFS.FunctionalTests.Should;
 using GVFS.FunctionalTests.Tools;
 using GVFS.Tests.Should;
 using NUnit.Framework;
+using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace GVFS.FunctionalTests.Tests.EnlistmentPerFixture
@@ -13,7 +15,6 @@ namespace GVFS.FunctionalTests.Tests.EnlistmentPerFixture
     public class PrefetchVerbTests : TestsWithEnlistmentPerFixture
     {
         private const string PrefetchCommitsAndTreesLock = "prefetch-commits-trees.lock";
-        private const string CommitGraphLock = "commit-graph.lock";
         private const string MultiPackIndexLock = "multi-pack-index.lock";
         private const string LsTreeTypeInPathBranchName = "FunctionalTests/20181105_LsTreeTypeInPath";
 
@@ -93,7 +94,7 @@ namespace GVFS.FunctionalTests.Tests.EnlistmentPerFixture
                     "gvfs/"
                 });
 
-            this.ExpectBlobCount(this.Enlistment.Prefetch("--folders-list " + tempFilePath), 279);
+            this.ExpectBlobCount(this.Enlistment.Prefetch("--folders-list \"" + tempFilePath + "\""), 279);
             File.Delete(tempFilePath);
         }
 
@@ -124,6 +125,13 @@ namespace GVFS.FunctionalTests.Tests.EnlistmentPerFixture
             this.fileSystem.WriteAllText(prefetchCommitsLockFile, this.Enlistment.EnlistmentRoot);
             prefetchCommitsLockFile.ShouldBeAFile(this.fileSystem);
 
+            this.fileSystem
+                .EnumerateDirectory(this.Enlistment.GetPackRoot(this.fileSystem))
+                .Split()
+                .Where(file => string.Equals(Path.GetExtension(file), ".keep", StringComparison.OrdinalIgnoreCase))
+                .Count()
+                .ShouldEqual(1, "Incorrect number of .keep files in pack directory");
+
             this.Enlistment.Prefetch("--commits");
             this.PostFetchStepShouldComplete();
             prefetchCommitsLockFile.ShouldNotExistOnDisk(this.fileSystem);
@@ -133,20 +141,75 @@ namespace GVFS.FunctionalTests.Tests.EnlistmentPerFixture
         [Category(Categories.MacTODO.M4)]
         public void PrefetchCleansUpPackDir()
         {
-            string multiPackIndexLockFile = Path.Combine(this.Enlistment.GetPackRoot(this.fileSystem),  MultiPackIndexLock);
+            string multiPackIndexLockFile = Path.Combine(this.Enlistment.GetPackRoot(this.fileSystem), MultiPackIndexLock);
             string oldGitTempFile = Path.Combine(this.Enlistment.GetPackRoot(this.fileSystem), "tmp_midx_XXXX");
+            string oldKeepFile = Path.Combine(this.Enlistment.GetPackRoot(this.fileSystem), "prefetch-00000000-HASH.keep");
 
             this.fileSystem.WriteAllText(multiPackIndexLockFile, this.Enlistment.EnlistmentRoot);
             this.fileSystem.WriteAllText(oldGitTempFile, this.Enlistment.EnlistmentRoot);
+            this.fileSystem.WriteAllText(oldKeepFile, this.Enlistment.EnlistmentRoot);
 
             this.Enlistment.Prefetch("--commits");
             oldGitTempFile.ShouldNotExistOnDisk(this.fileSystem);
+            oldKeepFile.ShouldNotExistOnDisk(this.fileSystem);
 
             this.PostFetchStepShouldComplete();
             multiPackIndexLockFile.ShouldNotExistOnDisk(this.fileSystem);
         }
 
         [TestCase, Order(12)]
+        public void PrefetchFilesFromFileListFile()
+        {
+            string tempFilePath = Path.Combine(Path.GetTempPath(), "temp.file");
+            try
+            {
+                File.WriteAllLines(
+                    tempFilePath,
+                    new[]
+                    {
+                        Path.Combine("GVFS", "GVFS", "Program.cs"),
+                        Path.Combine("GVFS", "GVFS.FunctionalTests", "GVFS.FunctionalTests.csproj")
+                    });
+
+                this.ExpectBlobCount(this.Enlistment.Prefetch($"--files-list \"{tempFilePath}\""), 2);
+            }
+            finally
+            {
+                File.Delete(tempFilePath);
+            }
+        }
+
+        [TestCase, Order(13)]
+        public void PrefetchFilesFromFileListStdIn()
+        {
+            string input = string.Join(
+                Environment.NewLine,
+                new[]
+                {
+                    Path.Combine("GVFS", "GVFS", "packages.config"),
+                    Path.Combine("GVFS", "GVFS.FunctionalTests", "App.config")
+                });
+
+            this.ExpectBlobCount(this.Enlistment.Prefetch("--stdin-files-list", standardInput: input), 2);
+        }
+
+        [TestCase, Order(14)]
+        public void PrefetchFolderListFromStdin()
+        {
+            string input = string.Join(
+                Environment.NewLine,
+                new[]
+                {
+                    "# A comment",
+                    " ",
+                    "gvfs/",
+                    "gvfs/gvfs",
+                    "gvfs/"
+                });
+
+            this.ExpectBlobCount(this.Enlistment.Prefetch("--stdin-folders-list", standardInput: input), 279);
+        }
+
         public void PrefetchPathsWithLsTreeTypeInPath()
         {
             ProcessResult checkoutResult = GitProcess.InvokeProcess(this.Enlistment.RepoRoot, "checkout " + LsTreeTypeInPathBranchName);

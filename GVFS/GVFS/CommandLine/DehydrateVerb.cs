@@ -3,6 +3,7 @@ using GVFS.Common;
 using GVFS.Common.FileSystem;
 using GVFS.Common.Git;
 using GVFS.Common.Http;
+using GVFS.Common.Maintenance;
 using GVFS.Common.NamedPipes;
 using GVFS.Common.Tracing;
 using GVFS.DiskLayoutUpgrades;
@@ -58,6 +59,34 @@ namespace GVFS.CommandLine
                         { nameof(this.EnlistmentRootPathParameter), this.EnlistmentRootPathParameter },
                     });
 
+                // This is only intended to be run by functional tests
+                if (this.MaintenanceJob != null)
+                {
+                    this.InitializeLocalCacheAndObjectsPaths(tracer, enlistment, retryConfig: null, serverGVFSConfig: null, cacheServer: null);
+                    PhysicalFileSystem fileSystem = new PhysicalFileSystem();
+                    GitRepo gitRepo = new GitRepo(
+                            tracer,
+                            enlistment,
+                            fileSystem);
+                    switch (this.MaintenanceJob)
+                    {
+                        case "LooseObjects":
+                            (new LooseObjectsStep(new GVFSContext(tracer, fileSystem, gitRepo, enlistment), forceRun: true)).Execute();
+                            return;
+
+                        case "PackfileMaintenance":
+                            (new PackfileMaintenanceStep(
+                                new GVFSContext(tracer, fileSystem, gitRepo, enlistment),
+                                forceRun: true,
+                                batchSize: this.PackfileMaintenanceBatchSize ?? PackfileMaintenanceStep.DefaultBatchSize)).Execute();
+                            return;
+
+                        default:
+                            this.ReportErrorAndExit($"Unknown maintenance job requested: {this.MaintenanceJob}");
+                            break;
+                    }
+                }
+
                 if (!this.Confirmed)
                 {
                     this.Output.WriteLine(
@@ -96,7 +125,7 @@ of your enlistment's src folder.
                 {
                     this.ReportErrorAndExit(tracer, error);
                 }
-                
+
                 RetryConfig retryConfig;
                 if (!RetryConfig.TryLoadFromGitConfig(tracer, enlistment, out retryConfig, out error))
                 {

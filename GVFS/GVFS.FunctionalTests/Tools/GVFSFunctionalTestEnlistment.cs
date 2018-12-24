@@ -197,9 +197,9 @@ namespace GVFS.FunctionalTests.Tools
             return this.gvfsProcess.TryMount(out output);
         }
 
-        public string Prefetch(string args, bool failOnError = true)
+        public string Prefetch(string args, bool failOnError = true, string standardInput = null)
         {
-            return this.gvfsProcess.Prefetch(args, failOnError);
+            return this.gvfsProcess.Prefetch(args, failOnError, standardInput);
         }
 
         public void Repair(bool confirm)
@@ -210,6 +210,16 @@ namespace GVFS.FunctionalTests.Tools
         public string Diagnose()
         {
             return this.gvfsProcess.Diagnose();
+        }
+
+        public string LooseObjectStep()
+        {
+            return this.gvfsProcess.LooseObjectStep();
+        }
+
+        public string PackfileMaintenanceStep(long? batchSize = null)
+        {
+            return this.gvfsProcess.PackfileMaintenanceStep(batchSize);
         }
 
         public string Status(string trace = null)
