@@ -1,0 +1,20 @@
+package:
+  name: gvfs
+  version: "1.0.18297.1"
+
+source:
+  git_url: "https://github.com/yijunyu/VFSForGit"
+  git_rev: "conda-osx"
+
+extra:
+  channels:
+    - yijunyu
+
+requirements:
+  host:
+    - git
+
+about:
+  home: "https://github.com/yijunyu/gumtree"
+  license: "MIT Licence"
+  license_file: License.md
