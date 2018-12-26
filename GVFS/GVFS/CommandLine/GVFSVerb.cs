@@ -462,7 +462,7 @@ You can specify a URL, a name of a configured cache server, or the special names
                 resolvedCacheServer = cacheServerResolver.ResolveNameFromRemote(cacheServer.Url, serverGVFSConfig);
             }
 
-            this.Output.WriteLine("Using cache server: " + resolvedCacheServer);
+            // this.Output.WriteLine("Using cache server: " + resolvedCacheServer);
             return resolvedCacheServer;
         }
 

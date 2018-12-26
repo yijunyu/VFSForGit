@@ -72,10 +72,10 @@ namespace GVFS.CommandLine
                     if (cacheServers != null && cacheServers.Any())
                     {
                         this.Output.WriteLine();
-                        this.Output.WriteLine("Available cache servers for: " + enlistment.RepoUrl);
+                        this.Output.WriteLine("Available cache servers");
                         foreach (CacheServerInfo cacheServer in cacheServers)
                         {
-                            this.Output.WriteLine(cacheServer);
+                            this.Output.WriteLine("server.");
                         }
                     }
                     else
@@ -87,8 +87,7 @@ namespace GVFS.CommandLine
                 {
                     string cacheServerUrl = CacheServerResolver.GetUrlFromConfig(enlistment);
                     CacheServerInfo cacheServer = cacheServerResolver.ResolveNameFromRemote(cacheServerUrl, serverGVFSConfig);
-
-                    this.Output.WriteLine("Using cache server: " + cacheServer);
+                    this.Output.WriteLine("Using cache server");
                 }
             }
         }

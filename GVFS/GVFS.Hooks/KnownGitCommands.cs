@@ -32,6 +32,7 @@ namespace GVFS.Hooks
             "config",
             "count-objects",
             "credential",
+            "credential-osxkeychain",
             "describe",
             "diff",
             "diff-files",

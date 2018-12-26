@@ -259,7 +259,7 @@ namespace GVFS.CommandLine
 
                 this.ValidateClientVersions(tracer, enlistment, serverGVFSConfig, showWarnings: false);
 
-                this.Output.WriteLine("Configured cache server: " + cacheServer);
+                // this.Output.WriteLine("Configured cache server: " + cacheServer);
             }
 
             this.InitializeLocalCacheAndObjectsPaths(tracer, enlistment, retryConfig, serverGVFSConfig, cacheServer);

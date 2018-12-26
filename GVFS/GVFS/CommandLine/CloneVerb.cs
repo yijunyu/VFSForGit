@@ -159,12 +159,14 @@ namespace GVFS.CommandLine
                             resolvedLocalCacheRoot = Path.GetFullPath(this.LocalCacheRoot);
                         }
 
-                        this.Output.WriteLine("Clone parameters:");
-                        this.Output.WriteLine("  Repo URL:     " + enlistment.RepoUrl);
-                        this.Output.WriteLine("  Branch:       " + (string.IsNullOrWhiteSpace(this.Branch) ? "Default" : this.Branch));
-                        this.Output.WriteLine("  Cache Server: " + cacheServer);
-                        this.Output.WriteLine("  Local Cache:  " + resolvedLocalCacheRoot);
-                        this.Output.WriteLine("  Destination:  " + enlistment.EnlistmentRoot);
+                        // if (enlistment.RepoUrl == string.Empty) {
+                        //     this.Output.WriteLine("Clone parameters:");
+                        //     this.Output.WriteLine("  Repo URL:     " + enlistment.RepoUrl);
+                        //     this.Output.WriteLine("  Branch:       " + (string.IsNullOrWhiteSpace(this.Branch) ? "Default" : this.Branch));
+                        //     this.Output.WriteLine("  Cache Server: " + cacheServer);
+                        //     this.Output.WriteLine("  Local Cache:  " + resolvedLocalCacheRoot);
+                        //     this.Output.WriteLine("  Destination:  " + enlistment.EnlistmentRoot);
+                        // }
 
                         string authErrorMessage;
                         if (!this.TryAuthenticate(tracer, enlistment, out authErrorMessage))

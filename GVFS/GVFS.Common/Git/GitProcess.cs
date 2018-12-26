@@ -177,6 +177,7 @@ namespace GVFS.Common.Git
 
             using (ITracer activity = tracer.StartActivity("TryGetCredentials", EventLevel.Informational))
             {
+                // Environment.SetEnvironmentVariable("GIT_TERMINAL_PROMPT", "1");
                 Result gitCredentialOutput = this.InvokeGitAgainstDotGitFolder(
                     "-c " + GitConfigSetting.CredentialUseHttpPath + "=true credential fill",
                     stdin => stdin.Write("url=" + repoUrl + "\n\n"),

@@ -174,7 +174,7 @@ namespace GVFS.CommandLine
 
                     CacheServerResolver cacheServerResolver = new CacheServerResolver(tracer, enlistment);
                     cacheServer = cacheServerResolver.ResolveNameFromRemote(cacheServer.Url, serverGVFSConfig);
-                    this.Output.WriteLine("Configured cache server: " + cacheServer);
+                    this.Output.WriteLine("Configured cache server.");
                 }
 
                 this.InitializeLocalCacheAndObjectsPaths(tracer, enlistment, retryConfig, serverGVFSConfig, cacheServer);

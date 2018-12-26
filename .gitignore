@@ -226,3 +226,5 @@ ModelManifest.xml
 
 # VS Code private directory
 .vscode/
+ProjFS.Mac/PrjFSKext/PrjFSKext.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+ProjFS.Mac/PrjFSKext/PrjFSKext.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
